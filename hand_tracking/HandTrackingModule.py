@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import mediapipe as mp
 import time
@@ -50,6 +52,30 @@ class HandDetector():
             if draw:
                 cv2.rectangle(img, (bbox[0]-20, bbox[1]-20), (bbox[0]+bbox[2]+20, bbox[1]+bbox[3]+20), (0, 255, 0), 2)  # 바운딩 박스
         return lmList
+
+    def findDistance(self, p1, p2, img=None, color=(255,0,255), scale=5):
+        """
+            Find the distance between two landmarks input should be (x1,y1) (x2,y2)
+            :param p1: Point1 (x1,y1)
+            :param p2: Point2 (x2,y2)
+            :param img: Image to draw output on. If no image input output img is None
+            :return: Distance between the points
+                     Image with output drawn
+                     Line information
+        """
+        x1, y1 = p1
+        x2, y2 = p2
+        cx, cy = (x1+x2)//2, (y1+y2)//2
+        length = math.hypot(x2-x1, y2-y1) # x1,y1에서 x2,y2 간 거리
+        info = (x1, y1, x2, y2, cx, cy)
+        if img is not None:
+            cv2.circle(img, (x1,y1), scale, color, cv2.FILLED)
+            cv2.circle(img, (x2,y2), scale, color, cv2.FILLED)
+            cv2.line(img, (x1,y1), (x2,y2), color, max(1, scale//3))
+            cv2.circle(img, (cx,cy), scale, color, cv2.FILLED)
+
+        return length, info ,img
+
 
 def main():
     pTime = 0
