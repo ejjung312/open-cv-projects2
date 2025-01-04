@@ -14,6 +14,7 @@ class HandDetector():
 
         self.mpHands = mp.solutions.hands
         self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.modelComplexity, self.detectionConf, self.trackConf)
+        self.tipIds = [4, 8, 12, 16, 20] # 손가락 끝 번호
         self.mpDraw = mp.solutions.drawing_utils
 
     def findHands(self, img, draw=True, flipType=True):
@@ -117,7 +118,39 @@ class HandDetector():
             cv2.line(img, (x1,y1), (x2,y2), color, max(1, scale//3))
             cv2.circle(img, (cx,cy), scale, color, cv2.FILLED)
 
-        return length, info ,img
+        return length, info, img
+
+    def fingersUp(self, myHand):
+        """
+        Finds how many fingers are open and returns in a list.
+        Considers left and right hands separately
+        :return: List of which fingers are up
+        """
+        fingers = []
+        myHandType = myHand["type"]
+        myLmList = myHand["lmList"]
+
+        if self.results.multi_hand_landmarks:
+            # thumb
+            # https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker?hl=ko#models
+            if myHandType == "Right":
+                if myLmList[self.tipIds[0]][0] > myLmList[self.tipIds[0]-1][0]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+            else:
+                if myLmList[self.tipIds[0]][0] < myLmList[self.tipIds[0]-1][0]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+            # 4 fingers
+            for id in range(1, 5):
+                if myLmList[self.tipIds[id]][1] < myLmList[self.tipIds[id]-2][1]:
+                    fingers.append(1)
+                else:
+                    fingers.append(0)
+
+        return fingers
 
 
 def main():
