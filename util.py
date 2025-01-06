@@ -35,7 +35,7 @@ def stackImages(imgArray, scale, labels=[]):
         hor = np.hstack(imgArray)
         hor_con = np.concatenate(imgArray)
         ver = hor
-    
+
     if len(labels) != 0:
         eachImgWidth = int(ver.shape[1]/cols)
         eachImgHeight = int(ver.shape[0]/rows)
