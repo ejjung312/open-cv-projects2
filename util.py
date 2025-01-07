@@ -182,3 +182,33 @@ def showAnswers(img, myIndex, grading, ans, questions, choices):
         cv2.circle(img, (cX,cY), 50, myColor, cv2.FILLED)
         
     return img
+
+
+def findContours(img, imgPre, minArea=1000, maxArea=float('inf'), sort=True,
+                filter=None, drawCon=True, c=(255,0,0), ct=(255,0,255),
+                retrType=cv2.RETR_EXTERNAL, approxType=cv2.CHAIN_APPROX_NONE):
+    
+    conFound = []
+    imgContours = img.copy()
+    contours, hierarchy = cv2.findContours(imgPre, retrType, approxType)
+    
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if minArea < area < maxArea:
+            peri = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, 0.02*peri, True)
+            
+            if filter is None or len(approx) in filter:
+                if drawCon:
+                    cv2.drawContours(imgContours, cnt, -1, c, 3)
+                    x, y, w, h = cv2.boundingRect(approx)
+                    cv2.putText(imgContours, str(len(approx)), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, ct, 2)
+                cx, cy = x + (w // 2), y + (h // 2)
+                cv2.rectangle(imgContours, (x, y), (x + w, y + h), c, 2)
+                cv2.circle(imgContours, (x + (w // 2), y + (h // 2)), 5, c, cv2.FILLED)
+                conFound.append({"cnt": cnt, "area": area, "bbox": [x, y, w, h], "center": [cx, cy]})
+                
+    if sort:
+        conFound = sorted(conFound, key=lambda x: x["area"], reverse=True) 
+    
+    return imgContours, conFound
