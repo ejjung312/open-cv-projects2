@@ -90,12 +90,13 @@ class PoseDetector:
         return length, img, info
 
 
-    def findAngle(self, p1, p2, p3, img=None, color=(255,0,255), scale=5):
-        x1, y1 = p1
-        x2, y2 = p2
-        x3, y3 = p3
+    def findAngle(self, p1, p2, p3, img=None, color=(0,0,255), scale=5):
+        x1, y1, z1 = p1
+        x2, y2, z2 = p2
+        x3, y3, z3 = p3
         
         # 세 점 (x1,y1), (x2,y2), (x3,y3) 사이의 각도 계산
+        # (x2,y2) 와 (x3,y3) 사이의 벡터 방향의 각도를 계산
         angle = math.degrees(math.atan2(y3-y2, x3-x2) - math.atan2(y1-y2, x1-x2))
         
         if angle < 0:
@@ -110,7 +111,7 @@ class PoseDetector:
             cv2.circle(img, (x2, y2), scale+5, color, max(1,scale//5))
             cv2.circle(img, (x3, y3), scale, color, cv2.FILLED)
             cv2.circle(img, (x3, y3), scale+5, color, max(1,scale//5))
-            cv2.putText(img, str(int(angle)), (x2 - 50, y2 + 50), cv2.FONT_HERSHEY_PLAIN, 2, color, max(1,scale//5))
+            cv2.putText(img, str(int(angle)), (x2-50, y2+50), cv2.FONT_HERSHEY_PLAIN, 2, color, max(1,scale//5))
             
         return angle, img
     
