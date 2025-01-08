@@ -63,7 +63,7 @@ class PoseDetector:
             y2 = self.lmList[29][1] + ad # 왼쪽 발바닥까지의 거리
             y1 = self.lmList[1][1] - ad # 왼쪽 눈까지의 거리
             bbox = (x1, y1, x2-x1, y2-y1)
-            cx, cy = bbox[0] + (bbox[2]//2), bbox[1] + bbox[3]//2
+            cx, cy = bbox[0] + (bbox[2]//2), bbox[1] + bbox[3]//2 # 바운딩박스의 중심점 계산
             
             self.bboxInfo = {"bbox": bbox, "center": (cx, cy)}
             

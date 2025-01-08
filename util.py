@@ -212,3 +212,30 @@ def findContours(img, imgPre, minArea=1000, maxArea=float('inf'), sort=True,
         conFound = sorted(conFound, key=lambda x: x["area"], reverse=True) 
     
     return imgContours, conFound
+
+
+def overlayPNG(imgBack, imgFront, pos=[0,0]):
+    hf,wf,cf = imgFront.shape
+    hb,wb,cb = imgBack.shape
+    
+    x1,y1 = max(pos[0],0), max(pos[1],0) # 전경 이미지가 배경 이미지 위에 그려질 시작 좌표 (왼쪽 상단)
+    x2,y2 = min(pos[0]+wf,wb), min(pos[1]+hf,hb) # 전경 이미지가 배경 이미지 위에 그려질 끝 좌표 (오른쪽 하단)
+    
+    x1_overlay = 0 if pos[0] >= 0 else -pos[0] # 전경 이미지의 유효한 x,y 시작점
+    y1_overlay = 0 if pos[1] >= 0 else -pos[1]
+    
+    wf, hf = x2-x1, y2-y1 # 전경 이미지가 실제로 배경 이미지에 그려질 영역의 너비(wf)와 높이(hf)를 다시 계산
+    
+    if wf <= 0 or hf <= 0:
+        return imgBack
+    
+    alpha = imgFront[y1_overlay:y1_overlay+hf, x1_overlay:x1_overlay+wf, 3]/255.0
+    inv_alpha = 1.0-alpha
+    
+    imgRGB = imgFront[y1_overlay:y1_overlay+hf, x1_overlay:x1_overlay+wf, 0:3]
+    
+    for c in range(0, 3):
+        # 블렌딩 공식: 최종 픽셀=(배경 픽셀×(1−α))+(전경 픽셀×α)
+        imgBack[y1:y2, x1:x2, c] = imgBack[y1:y2, x1:x2, c]*inv_alpha + imgRGB[:,:,c]*alpha
+        
+    return imgBack
